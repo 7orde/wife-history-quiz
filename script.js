@@ -25,14 +25,25 @@ const eventsCompletedEl = document.getElementById('eventsCompleted');
 const avgDistanceEl = document.getElementById('avgDistance');
 const statsArea = document.getElementById('statsArea');
 
+// Shuffle array using Fisher-Yates algorithm
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
 // Load events from JSON
 async function loadEvents() {
     try {
-        const response = await fetch('../events.json');
+        const response = await fetch('./events.json');
         events = await response.json();
+        events = shuffleArray(events);
         totalEvents = events.length;
         totalCountEl.textContent = totalEvents;
-        console.log('Events loaded:', events);
+        console.log('Events loaded and shuffled:', events);
         
         if (events.length > 0) {
             loadEvent();
