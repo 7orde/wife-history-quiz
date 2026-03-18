@@ -126,11 +126,10 @@ yearSliderEl.addEventListener('input', updateTimelineMarker);
 
 // Debounce flag to prevent multiple rapid clicks
 let yearAdjustmentInProgress = false;
+let holdInterval = null;
+let holdDelay = null;
 
 function adjustYear(direction) {
-    if (yearAdjustmentInProgress) return;
-    yearAdjustmentInProgress = true;
-    
     const currentYear = parseInt(yearSliderEl.value);
     const minYear = parseInt(yearSliderEl.min);
     const maxYear = parseInt(yearSliderEl.max);
@@ -142,29 +141,56 @@ function adjustYear(direction) {
         yearSliderEl.value = newYear;
         updateTimelineMarker();
     }
+}
+
+function startHold(direction) {
+    if (holdInterval) clearInterval(holdInterval);
+    if (holdDelay) clearTimeout(holdDelay);
     
-    setTimeout(() => {
-        yearAdjustmentInProgress = false;
-    }, 100);
+    // First adjustment immediately
+    adjustYear(direction);
+    
+    // Start continuous adjustment after 500ms
+    holdDelay = setTimeout(() => {
+        holdInterval = setInterval(() => {
+            adjustYear(direction);
+        }, 100);
+    }, 500);
+}
+
+function stopHold() {
+    if (holdInterval) {
+        clearInterval(holdInterval);
+        holdInterval = null;
+    }
+    if (holdDelay) {
+        clearTimeout(holdDelay);
+        holdDelay = null;
+    }
 }
 
 // Arrow button event listeners for year adjustment
-const handleDecrementClick = () => adjustYear(-1);
-const handleIncrementClick = () => adjustYear(1);
-
-yearDecrementBtn.addEventListener('click', handleDecrementClick);
-yearDecrementBtn.addEventListener('touchend', (e) => {
+yearDecrementBtn.addEventListener('click', () => adjustYear(-1));
+yearDecrementBtn.addEventListener('pointerdown', () => startHold(-1));
+yearDecrementBtn.addEventListener('pointerup', stopHold);
+yearDecrementBtn.addEventListener('pointerleave', stopHold);
+yearDecrementBtn.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    handleDecrementClick();
+    startHold(-1);
 });
-yearDecrementBtn.addEventListener('pointerdown', handleDecrementClick);
+yearDecrementBtn.addEventListener('touchend', stopHold);
+yearDecrementBtn.addEventListener('touchcancel', stopHold);
 
-yearIncrementBtn.addEventListener('click', handleIncrementClick);
-yearIncrementBtn.addEventListener('touchend', (e) => {
+yearIncrementBtn.addEventListener('click', () => adjustYear(1));
+yearIncrementBtn.addEventListener('pointerdown', () => startHold(1));
+yearIncrementBtn.addEventListener('pointerup', stopHold);
+yearIncrementBtn.addEventListener('pointerleave', stopHold);
+yearIncrementBtn.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    handleIncrementClick();
+    startHold(1);
 });
-yearIncrementBtn.addEventListener('pointerdown', handleIncrementClick);
+yearIncrementBtn.addEventListener('touchend', stopHold);
+yearIncrementBtn.addEventListener('touchcancel', stopHold);
 
 // Submit answer
 submitBtn.addEventListener('click', checkAnswer);
@@ -174,6 +200,9 @@ nextBtn.addEventListener('click', () => {
     currentEventIndex++;
     nextBtn.style.display = 'none';
     submitBtn.style.display = 'block';
+    submitBtn.style.opacity = '1';
+    submitBtn.style.backgroundColor = '';
+    submitBtn.style.color = '';
     yearSliderEl.disabled = false;
     yearDecrementBtn.disabled = false;
     yearIncrementBtn.disabled = false;

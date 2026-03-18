@@ -10,20 +10,49 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
     <title>History Timeline Quiz</title>
     <style>
+
         * {
             font-family: 'Poppins', sans-serif;
         }
 
         body {
-            background: #141314;
+            min-height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            position: relative;
+            /* fallback color */
+            background: #000;
+        }
+
+        @keyframes colorRotate {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .min-h-screen {
+            position: relative;
+            z-index: 1;
         }
 
         .quiz-card {
-            background: #1a1a1a;
-            border: 1px solid #333;
+            background: rgba(26, 26, 26, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), inset 0 0 250px rgba(255, 255, 255, 0.02);
         }
 
         input[type="range"] {
@@ -150,16 +179,21 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border-radius: 8px;
         }
 
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(255, 255, 255, 0.3);
+            letter-spacing: 1px;
         }
 
-        .btn-submit:active {
-            transform: translateY(0);
+        .btn-submit:active:not(:disabled) {
+            transform: translateY(-1px);
         }
 
         .btn-submit:disabled {
@@ -176,15 +210,25 @@
             appearance: none;
             border: none;
             font-size: 1.2rem;
+            transition: all 0.2s ease;
+            background: linear-gradient(135deg, #3a3a3c 0%, #2c2c2e 100%);
+            border: 1px solid #444;
         }
 
-        #yearDecrement:active, #yearIncrement:active {
-            transform: scale(0.95);
+        #yearDecrement:hover:not(:disabled), #yearIncrement:hover:not(:disabled) {
+            background: linear-gradient(135deg, #4a4a4c 0%, #3c3c3e 100%);
+            border-color: #555;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        #yearDecrement:active:not(:disabled), #yearIncrement:active:not(:disabled) {
+            transform: scale(0.92);
         }
 
         #yearDecrement:disabled, #yearIncrement:disabled {
             cursor: not-allowed;
-            opacity: 0.5;
+            opacity: 0.4;
         }
 
         .fade-in {
@@ -200,30 +244,98 @@
             letter-spacing: -1.5px;
             font-weight: 800;
             text-transform: lowercase;
-            font-size: 2rem;
+            font-size: 2.5rem;
             color: #ffffff;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            background: linear-gradient(135deg, #ffffff 0%, #d4d4d8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
         }
 
         h2 {
             color: #ffffff;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
         }
 
         h3 {
             color: #ffffff;
             font-weight: 700;
+            font-size: 1.875rem;
+            letter-spacing: -0.3px;
+            line-height: 1.3;
+        }
+
+        #eventQuestion {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1.875rem;
+            line-height: 1.4;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #ffffff 0%, #e5e5e5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        #eventHint {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        #correctCount, #totalCount {
+            color: #4ade80;
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        .score-display {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        #feedbackContainer {
+            min-height: 2rem;
+            border-radius: 8px;
+        }
+
+        #feedbackContainer .text-green-400 {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+        }
+
+        #feedbackContainer .text-red-400 {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
         }
 
         p {
             color: #a0a0a0;
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
 
         .text-gray-500 {
-            color: #808080 !important;
+            color: #909090 !important;
+            font-size: 0.875rem;
         }
 
         .text-gray-600 {
-            color: #707070 !important;
+            color: #7a7a7a !important;
+            font-size: 0.875rem;
         }
 
         .text-gray-700 {
@@ -267,6 +379,8 @@
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
+    <!-- Background Animation removed; replaced by CSS color-rotating background -->
+    
     <!-- Main card container -->
     <div class="quiz-card rounded-xl shadow-2xl max-w-2xl w-full p-8 relative">
         <!-- USSR Easter Egg Logo -->
