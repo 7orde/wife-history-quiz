@@ -22,8 +22,10 @@ const correctCountEl = document.getElementById('correctCount');
 const totalCountEl = document.getElementById('totalCount');
 const accuracyEl = document.getElementById('accuracy');
 const eventsCompletedEl = document.getElementById('eventsCompleted');
-const avgDistanceEl = document.getElementById('avgDistance');
+
 const statsArea = document.getElementById('statsArea');
+const yearDecrementBtn = document.getElementById('yearDecrement');
+const yearIncrementBtn = document.getElementById('yearIncrement');
 
 // Shuffle array using Fisher-Yates algorithm
 function shuffleArray(array) {
@@ -33,6 +35,12 @@ function shuffleArray(array) {
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
+}
+
+// Check if event is USSR-related
+function isUSSREvent(eventName) {
+    const ussrKeywords = ['USSR', 'Soviet', 'Bolshevik', 'Lenin', 'Stalin', 'Russian Revolution', 'October Revolution'];
+    return ussrKeywords.some(keyword => eventName.includes(keyword));
 }
 
 // Load events from JSON
@@ -105,10 +113,35 @@ function updateTimelineMarker() {
     });
     
     selectedYearEl.textContent = year;
+    
+    // Update arrow button states
+    yearDecrementBtn.disabled = year <= minYear;
+    yearIncrementBtn.disabled = year >= maxYear;
+    yearDecrementBtn.style.opacity = year <= minYear ? '0.5' : '1';
+    yearIncrementBtn.style.opacity = year >= maxYear ? '0.5' : '1';
 }
 
 // Slider event listener
 yearSliderEl.addEventListener('input', updateTimelineMarker);
+
+// Arrow button event listeners for year adjustment
+yearDecrementBtn.addEventListener('click', () => {
+    const currentYear = parseInt(yearSliderEl.value);
+    const minYear = parseInt(yearSliderEl.min);
+    if (currentYear > minYear) {
+        yearSliderEl.value = currentYear - 1;
+        updateTimelineMarker();
+    }
+});
+
+yearIncrementBtn.addEventListener('click', () => {
+    const currentYear = parseInt(yearSliderEl.value);
+    const maxYear = parseInt(yearSliderEl.max);
+    if (currentYear < maxYear) {
+        yearSliderEl.value = currentYear + 1;
+        updateTimelineMarker();
+    }
+});
 
 // Submit answer
 submitBtn.addEventListener('click', checkAnswer);
@@ -119,6 +152,8 @@ nextBtn.addEventListener('click', () => {
     nextBtn.style.display = 'none';
     submitBtn.style.display = 'block';
     yearSliderEl.disabled = false;
+    yearDecrementBtn.disabled = false;
+    yearIncrementBtn.disabled = false;
     submitBtn.disabled = false;
     loadEvent();
 });
@@ -131,7 +166,7 @@ function checkAnswer() {
     const correctYear = parseInt(events[currentEventIndex].date);
     const distance = Math.abs(userYear - correctYear);
     const maxDistance = 100; // Max possible distance in years
-    const isCorrect = distance <= 5; // Within 5 years is considered correct
+    const isCorrect = distance === 0; // Exactly correct
 
     distances.push(distance);
 
@@ -163,6 +198,25 @@ function checkAnswer() {
     if (isCorrect) {
         score++;
         correctCountEl.textContent = score;
+        
+        // Easter egg: Show hammer and sickle for USSR events
+        if (isUSSREvent(events[currentEventIndex].name)) {
+            const ussrLogo = document.getElementById('ussrLogo');
+            ussrLogo.style.filter = 'blur(10px)';
+            gsap.to(ussrLogo, {
+                opacity: 1,
+                duration: 0.8,
+                ease: 'power2.out',
+                onStart: () => {
+                    ussrLogo.style.filter = 'blur(10px)';
+                },
+                onUpdate: function() {
+                    const progress = this.progress();
+                    const blur = 10 * (1 - progress);
+                    ussrLogo.style.filter = `blur(${blur}px)`;
+                }
+            });
+        }
         
         // Success animation
         gsap.to(feedbackEl, {
@@ -228,8 +282,21 @@ function checkAnswer() {
 
     // Disable slider after submission
     yearSliderEl.disabled = true;
+    yearDecrementBtn.disabled = true;
+    yearIncrementBtn.disabled = true;
     submitBtn.disabled = true;
     gsap.to(submitBtn, { opacity: 0.6, duration: 0.3 });
+
+    // Hide answer popup after 5 seconds
+    gsap.delayedCall(5, () => {
+        gsap.to(answerPopup, {
+            opacity: 0,
+            duration: 0.3,
+            onComplete: () => {
+                answerPopup.classList.remove('show');
+            }
+        });
+    });
 
     // Show next button after delay
     gsap.delayedCall(1.5, () => {
@@ -282,9 +349,6 @@ function updateStats() {
     const accuracy = Math.round((score / (currentEventIndex + 1)) * 100);
     accuracyEl.textContent = accuracy + '%';
     
-    const avgDistance = Math.round(distances.reduce((a, b) => a + b, 0) / distances.length);
-    avgDistanceEl.textContent = avgDistance;
-    
     statsArea.classList.remove('hidden');
 }
 
@@ -298,7 +362,6 @@ function showGameOver() {
     gsap.to(nextBtn, { opacity: 0, y: randomY, duration: 0.5 });
     
     const finalAccuracy = Math.round((score / totalEvents) * 100);
-    const avgDistance = Math.round(distances.reduce((a, b) => a + b, 0) / distances.length);
 
     const gameOverHTML = `
         <div class="text-center">
@@ -311,10 +374,6 @@ function showGameOver() {
                 <div>
                     <div class="text-4xl font-bold text-white">${finalAccuracy}%</div>
                     <div class="text-sm text-gray-600">Accuracy</div>
-                </div>
-                <div>
-                    <div class="text-4xl font-bold text-white">${avgDistance}</div>
-                    <div class="text-sm text-gray-600">Avg Years Off</div>
                 </div>
             </div>
             <button id="restartBtn" class="w-full bg-white text-black font-semibold py-3 px-8 rounded-lg hover:shadow-lg transition-all">
