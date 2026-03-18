@@ -10,7 +10,6 @@ An interactive quiz to test your knowledge of historical events from the 20th ce
 - Interactive slider to choose a year (1900–1999).
 - Immediate feedback on correct/incorrect answers.
 - Timeline at the top gradually fills with green markers for correctly placed events.
-- Optional image pop‑up for events (if data includes image URLs).
 - Smooth animations using GSAP.
 
 ## Tech Stack
