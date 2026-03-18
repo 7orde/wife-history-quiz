@@ -134,7 +134,27 @@ yearDecrementBtn.addEventListener('click', () => {
     }
 });
 
+yearDecrementBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    const currentYear = parseInt(yearSliderEl.value);
+    const minYear = parseInt(yearSliderEl.min);
+    if (currentYear > minYear) {
+        yearSliderEl.value = currentYear - 1;
+        updateTimelineMarker();
+    }
+});
+
 yearIncrementBtn.addEventListener('click', () => {
+    const currentYear = parseInt(yearSliderEl.value);
+    const maxYear = parseInt(yearSliderEl.max);
+    if (currentYear < maxYear) {
+        yearSliderEl.value = currentYear + 1;
+        updateTimelineMarker();
+    }
+});
+
+yearIncrementBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
     const currentYear = parseInt(yearSliderEl.value);
     const maxYear = parseInt(yearSliderEl.max);
     if (currentYear < maxYear) {

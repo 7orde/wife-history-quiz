@@ -167,6 +167,26 @@
             cursor: not-allowed;
         }
 
+        #yearDecrement, #yearIncrement {
+            cursor: pointer;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            user-select: none;
+            -webkit-appearance: none;
+            appearance: none;
+            border: none;
+            font-size: 1.2rem;
+        }
+
+        #yearDecrement:active, #yearIncrement:active {
+            transform: scale(0.95);
+        }
+
+        #yearDecrement:disabled, #yearIncrement:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
         .fade-in {
             opacity: 0;
         }
