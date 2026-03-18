@@ -124,44 +124,47 @@ function updateTimelineMarker() {
 // Slider event listener
 yearSliderEl.addEventListener('input', updateTimelineMarker);
 
-// Arrow button event listeners for year adjustment
-yearDecrementBtn.addEventListener('click', () => {
+// Debounce flag to prevent multiple rapid clicks
+let yearAdjustmentInProgress = false;
+
+function adjustYear(direction) {
+    if (yearAdjustmentInProgress) return;
+    yearAdjustmentInProgress = true;
+    
     const currentYear = parseInt(yearSliderEl.value);
     const minYear = parseInt(yearSliderEl.min);
-    if (currentYear > minYear) {
-        yearSliderEl.value = currentYear - 1;
+    const maxYear = parseInt(yearSliderEl.max);
+    
+    let newYear = currentYear + direction;
+    newYear = Math.max(minYear, Math.min(maxYear, newYear));
+    
+    if (newYear !== currentYear) {
+        yearSliderEl.value = newYear;
         updateTimelineMarker();
     }
-});
+    
+    setTimeout(() => {
+        yearAdjustmentInProgress = false;
+    }, 100);
+}
 
+// Arrow button event listeners for year adjustment
+const handleDecrementClick = () => adjustYear(-1);
+const handleIncrementClick = () => adjustYear(1);
+
+yearDecrementBtn.addEventListener('click', handleDecrementClick);
 yearDecrementBtn.addEventListener('touchend', (e) => {
     e.preventDefault();
-    const currentYear = parseInt(yearSliderEl.value);
-    const minYear = parseInt(yearSliderEl.min);
-    if (currentYear > minYear) {
-        yearSliderEl.value = currentYear - 1;
-        updateTimelineMarker();
-    }
+    handleDecrementClick();
 });
+yearDecrementBtn.addEventListener('pointerdown', handleDecrementClick);
 
-yearIncrementBtn.addEventListener('click', () => {
-    const currentYear = parseInt(yearSliderEl.value);
-    const maxYear = parseInt(yearSliderEl.max);
-    if (currentYear < maxYear) {
-        yearSliderEl.value = currentYear + 1;
-        updateTimelineMarker();
-    }
-});
-
+yearIncrementBtn.addEventListener('click', handleIncrementClick);
 yearIncrementBtn.addEventListener('touchend', (e) => {
     e.preventDefault();
-    const currentYear = parseInt(yearSliderEl.value);
-    const maxYear = parseInt(yearSliderEl.max);
-    if (currentYear < maxYear) {
-        yearSliderEl.value = currentYear + 1;
-        updateTimelineMarker();
-    }
+    handleIncrementClick();
 });
+yearIncrementBtn.addEventListener('pointerdown', handleIncrementClick);
 
 // Submit answer
 submitBtn.addEventListener('click', checkAnswer);
