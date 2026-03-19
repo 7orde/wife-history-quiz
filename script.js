@@ -8,6 +8,7 @@ let submitted = false;
 
 // DOM elements
 const eventQuestionEl = document.getElementById('eventQuestion');
+const eventDescriptionEl = document.getElementById('eventDescription');
 const eventContainerEl = document.getElementById('eventContainer');
 const yearSliderEl = document.getElementById('yearSlider');
 const selectedYearEl = document.getElementById('selectedYear');
@@ -17,6 +18,7 @@ const feedbackEl = document.getElementById('feedback');
 const timelineContainer = document.getElementById('timelineContainer');
 const userMarker = document.getElementById('userMarker');
 const correctMarker = document.getElementById('correctMarker');
+const timelineLine = document.querySelector('.timeline-line');
 const answerPopup = document.getElementById('answerPopup');
 const correctCountEl = document.getElementById('correctCount');
 const totalCountEl = document.getElementById('totalCount');
@@ -87,6 +89,8 @@ function loadEvent() {
     // Set the text first
     const questionText = event.name;
     eventQuestionEl.textContent = questionText;
+    eventDescriptionEl.textContent = event.description || '';
+    eventDescriptionEl.style.display = 'none';
     console.log('Question text set to:', questionText);
     
     // Animate the parent container in
@@ -170,7 +174,6 @@ function stopHold() {
 }
 
 // Arrow button event listeners for year adjustment
-yearDecrementBtn.addEventListener('click', () => adjustYear(-1));
 yearDecrementBtn.addEventListener('pointerdown', () => startHold(-1));
 yearDecrementBtn.addEventListener('pointerup', stopHold);
 yearDecrementBtn.addEventListener('pointerleave', stopHold);
@@ -181,7 +184,6 @@ yearDecrementBtn.addEventListener('touchstart', (e) => {
 yearDecrementBtn.addEventListener('touchend', stopHold);
 yearDecrementBtn.addEventListener('touchcancel', stopHold);
 
-yearIncrementBtn.addEventListener('click', () => adjustYear(1));
 yearIncrementBtn.addEventListener('pointerdown', () => startHold(1));
 yearIncrementBtn.addEventListener('pointerup', stopHold);
 yearIncrementBtn.addEventListener('pointerleave', stopHold);
@@ -225,16 +227,17 @@ function checkAnswer() {
     // Show correct answer marker
     const minYear = parseInt(yearSliderEl.min);
     const maxYear = parseInt(yearSliderEl.max);
-    const correctPercentage = ((correctYear - minYear) / (maxYear - minYear)) * 100;
     
-    // Position the correct marker
-    correctMarker.style.left = correctPercentage + '%';
-    correctMarker.classList.add('show');
-    gsap.to(correctMarker, {
-        opacity: 1,
-        duration: 0.5,
-        ease: 'power2.out'
-    });
+    // Show result dot at the user's guess position (persists across events)
+    const userPercentage = ((userYear - minYear) / (maxYear - minYear)) * 100;
+    const dot = document.createElement('div');
+    dot.className = 'result-dot ' + (isCorrect ? 'correct' : 'incorrect');
+    dot.style.left = userPercentage + '%';
+    timelineLine.appendChild(dot);
+    gsap.fromTo(dot,
+        { opacity: 0, scale: 0 },
+        { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out' }
+    );
 
     // Show answer popup
     answerPopup.classList.add('show');
@@ -331,6 +334,9 @@ function checkAnswer() {
             { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: 'back.out' }
         );
     }
+
+    // Reveal event description
+    eventDescriptionEl.style.display = 'block';
 
     // Disable slider after submission
     yearSliderEl.disabled = true;
@@ -457,7 +463,8 @@ function restartQuiz() {
     yearSliderEl.disabled = false;
     submitBtn.disabled = false;
     gsap.to(submitBtn, { opacity: 1, duration: 0.3, backgroundColor: 'rgb(102, 126, 234)' });
-    
+    // Clear all persistent result dots
+    timelineLine.querySelectorAll('.result-dot').forEach(d => d.remove());
     loadEvent();
 }
 

@@ -29,16 +29,28 @@
             background: #000;
         }
 
-        @keyframes colorRotate {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
+        @keyframes blob1 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33%       { transform: translate(50px, -40px) scale(1.06); }
+            66%       { transform: translate(-30px, 55px) scale(0.96); }
+        }
+        @keyframes blob2 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            40%       { transform: translate(-60px, 45px) scale(1.04); }
+            75%       { transform: translate(40px, -35px) scale(0.97); }
+        }
+        @keyframes blob3 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50%       { transform: translate(35px, 50px) scale(1.05); }
+        }
+
+        .bg-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(90px);
+            pointer-events: none;
+            z-index: 0;
+            will-change: transform;
         }
 
         .min-h-screen {
@@ -141,6 +153,28 @@
 
         .answer-arrow.show {
             opacity: 1;
+        }
+
+        .result-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .result-dot.correct {
+            background: #4ade80;
+            box-shadow: 0 0 6px rgba(74, 222, 128, 0.6);
+            top: -14px;
+        }
+
+        .result-dot.incorrect {
+            background: #ef4444;
+            box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+            top: 6px;
         }
 
         .answer-popup {
@@ -379,7 +413,10 @@
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
-    <!-- Background Animation removed; replaced by CSS color-rotating background -->
+    <!-- Atmospheric background blobs -->
+    <div class="bg-blob" style="width:520px;height:520px;background:rgba(110,18,18,0.28);top:-140px;left:-140px;animation:blob1 20s ease-in-out infinite;"></div>
+    <div class="bg-blob" style="width:600px;height:600px;background:rgba(15,55,75,0.25);bottom:-160px;right:-160px;animation:blob2 25s ease-in-out infinite;"></div>
+    <div class="bg-blob" style="width:380px;height:380px;background:rgba(55,18,85,0.20);top:42%;left:38%;animation:blob3 30s ease-in-out infinite;"></div>
     
     <!-- Main card container -->
     <div class="quiz-card rounded-xl shadow-2xl max-w-2xl w-full p-8 relative">
@@ -420,7 +457,8 @@
         <!-- Event question -->
         <div id="eventContainer" class="fade-in text-center mb-12">
             <h3 id="eventQuestion" class="text-3xl mb-2">Loading event...</h3>
-            <p id="eventHint" class="text-sm text-gray-600">Place this event on the timeline</p>
+            <p id="eventDescription" class="text-sm text-gray-500 mb-3" style="display:none;"></p>
+            <p id="eventHint" class="text-sm text-gray-600">SELECT THE CORRECT DATE</p>
         </div>
 
         <!-- Year slider -->
@@ -441,20 +479,20 @@
             </div>
         </div>
 
-        <!-- Submit button -->
-        <button id="submitBtn" class="btn-submit w-full py-3 px-6 rounded-lg font-semibold mb-6 transition-all">
-            Check Answer
-        </button>
+        <!-- Button overlay container -->
+        <div class="relative h-14 mb-6">
+            <button id="submitBtn" class="btn-submit w-full py-3 px-6 rounded-lg font-semibold transition-all absolute inset-0">
+                Check Answer
+            </button>
+            <button id="nextBtn" class="btn-submit w-full py-3 px-6 rounded-lg font-semibold transition-all absolute inset-0 hidden">
+                Next Event →
+            </button>
+        </div>
 
         <!-- Feedback area -->
         <div id="feedbackContainer" class="min-h-8 flex items-center justify-center mb-4">
             <div id="feedback" class="text-center text-sm"></div>
         </div>
-
-        <!-- Next button -->
-        <button id="nextBtn" class="w-full bg-white text-black font-semibold py-3 px-6 rounded-lg hidden transition-all duration-300 hover:shadow-lg">
-            Next Event →
-        </button>
 
         <!-- Stats -->
         <div id="statsArea" class="flex justify-around mt-8 pt-8 border-t border-gray-700 hidden">
