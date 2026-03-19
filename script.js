@@ -233,6 +233,8 @@ function checkAnswer() {
     const dot = document.createElement('div');
     dot.className = 'result-dot ' + (isCorrect ? 'correct' : 'incorrect');
     dot.style.left = userPercentage + '%';
+    dot.setAttribute('data-event', events[currentEventIndex].name);
+    dot.title = events[currentEventIndex].name;
     timelineLine.appendChild(dot);
     gsap.fromTo(dot,
         { opacity: 0, scale: 0 },

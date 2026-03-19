@@ -161,8 +161,27 @@
             height: 8px;
             border-radius: 50%;
             transform: translateX(-50%);
-            pointer-events: none;
+            pointer-events: all;
             opacity: 0;
+            cursor: pointer;
+        }
+
+        .result-dot:hover::after {
+            content: attr(data-event);
+            position: absolute;
+            background: rgba(20, 20, 20, 0.95);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+            z-index: 20;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
 
         .result-dot.correct {
