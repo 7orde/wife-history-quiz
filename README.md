@@ -2,6 +2,8 @@
 
 An interactive quiz to test your knowledge of historical events from the 20th century. Drag the slider to select a year for the displayed event, get feedback, and watch your timeline fill with markers as you progress.
 
+Fundementals were coded by me, like inputing list data etc and creating the structure of the page. However more complex things like the GSAP animations, Game reset functions were all done by Claude.
+
 <img width="947" height="703" alt="image" src="https://github.com/user-attachments/assets/89a18b01-7445-419f-8164-d835d1c9e43e" />
 
 
